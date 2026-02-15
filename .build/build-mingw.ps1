@@ -14,7 +14,7 @@ param (
     [string] $GTestPath,
 
     [Parameter(Mandatory=$false)]
-    [string] $EncodingType = "NONE",
+    [string] $EncodingType = "WIN32API",
 
     [Parameter(ValueFromRemainingArguments=$true)]
     [string[]] $ExtraArgs
