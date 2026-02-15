@@ -1,30 +1,15 @@
 <#
 .DESCRIPTION
 Runs unit tests on Windows
+
+NOTE: This script is a compatibility wrapper. Use run-unittest-windows.ps1 instead.
 #>
 
-# Standard boilerplate
-Set-StrictMode -Version Latest
-$ErrorActionPreference = 'Stop'
-$PSDefaultParameterValues['*:ErrorAction'] = 'Stop'
+[CmdletBinding(PositionalBinding=$false)]
+param (
+    [Parameter(ValueFromRemainingArguments=$true)]
+    [string[]] $TestArgs
+)
 
-# Go to repo root
-$repoRoot = (Resolve-Path "$PSScriptRoot\..").Path
-Push-Location $repoRoot
-
-try {
-    cd build
-
-    # Use ctest
-    #ctest -C Debug --output-on-failure
-
-    # Run gtest-generated binary directly, produces more detailed output
-    #
-    # NOTE: `$args` is a built-in PowerShell variable that contains all command-line arguments
-    # passed to the script (see https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_automatic_variables?view=powershell-7.5#args).
-    # We use [splatting](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_splatting?view=powershell-7.5)
-    # to pass all received arguments to the test runner.
-    ./tests/Debug/unittest.exe @args
-} finally {
-    Pop-Location
-}
+# Forward to unified test script
+& "$PSScriptRoot\run-unittest-windows.ps1" -Toolchain MSVC @TestArgs
