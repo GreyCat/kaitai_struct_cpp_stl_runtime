@@ -17,7 +17,7 @@
 #define bswap_16(x) __builtin_bswap16(x)
 #define bswap_32(x) __builtin_bswap32(x)
 #define bswap_64(x) __builtin_bswap64(x)
-#elif defined(_MSC_VER) // !__APPLE__ && !__MINGW32__ && !__MINGW64__
+#elif defined(_MSC_VER) // MSVC
 #include <stdlib.h>
 #define __LITTLE_ENDIAN     1234
 #define __BIG_ENDIAN        4321
