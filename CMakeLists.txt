@@ -1,20 +1,14 @@
+cmake_minimum_required (VERSION 3.11)
 project (kaitai_struct_cpp_stl_runtime CXX)
-cmake_minimum_required (VERSION 3.3)
 enable_testing()
+
+option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
+option(BUILD_TESTS "Build tests" ON)
 
 set (CMAKE_INCLUDE_CURRENT_DIR ON)
 
 find_package(ZLIB)
-
-find_path(ICONV_INCLUDE_DIRS iconv.h)
-mark_as_advanced(ICONV_INCLUDE_DIRS)
-find_library(ICONV_LIBRARIES NAMES libiconv libiconv-2 iconv)
-mark_as_advanced(ICONV_LIBRARIES)
-
-set(ICONV_FOUND FALSE)
-if(ICONV_INCLUDE_DIRS AND ICONV_LIBRARIES)
-    SET(ICONV_FOUND TRUE)
-endif()
+find_package(Iconv)
 
 set (HEADERS
     kaitai/kaitaistream.h
@@ -26,38 +20,24 @@ set (SOURCES
     kaitai/kaitaistream.cpp
 )
 
-set(STRING_ENCODING_TYPE "ICONV" CACHE STRING "Set the way strings have to be encoded (ICONV|NONE|...)")
+set(STRING_ENCODING_TYPE "ICONV" CACHE STRING "Set the way strings have to be encoded (ICONV|WIN32API|NONE|...)")
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
-# Maximum warnings emission, treat all warnings as errors
-if (MSVC)
-    add_compile_options(/W4 /WX)
-else()
-    add_compile_options(-Wall -Wextra -Wpedantic -Werror)
-endif()
-
-add_library (${PROJECT_NAME} SHARED ${HEADERS} ${SOURCES})
+add_library (${PROJECT_NAME} ${HEADERS} ${SOURCES})
 set_property(TARGET ${PROJECT_NAME} PROPERTY PUBLIC_HEADER ${HEADERS})
+target_include_directories(${PROJECT_NAME} INTERFACE ${PROJECT_SOURCE_DIR})
 
 if (ZLIB_FOUND)
-    target_include_directories(${PROJECT_NAME} PRIVATE ${ZLIB_INCLUDE_DIRS})
-    target_link_libraries(${PROJECT_NAME} PRIVATE ${ZLIB_LIBRARIES})
-    target_compile_definitions(${PROJECT_NAME} PRIVATE -DKS_ZLIB)
+    target_link_libraries(${PROJECT_NAME} PRIVATE ZLIB::ZLIB)
+    target_compile_definitions(${PROJECT_NAME} PUBLIC -DKS_ZLIB)
 endif()
 
-if(ICONV_FOUND)
-    target_include_directories(${PROJECT_NAME} PRIVATE ${ICONV_INCLUDE_DIRS})
-    target_link_libraries(${PROJECT_NAME} PRIVATE ${ICONV_LIBRARIES})
+if(Iconv_FOUND)
+    target_link_libraries(${PROJECT_NAME} PRIVATE Iconv::Iconv)
 endif()
 
-if (STRING_ENCODING_TYPE STREQUAL "ICONV")
-    target_compile_definitions(${PROJECT_NAME} PRIVATE -DKS_STR_ENCODING_ICONV)
-elseif (STRING_ENCODING_TYPE STREQUAL "NONE")
-    target_compile_definitions(${PROJECT_NAME} PRIVATE -DKS_STR_ENCODING_NONE)
-else()
-    # User action requested
-endif()
+include(Common.cmake)
 
 install(TARGETS ${PROJECT_NAME}
     ARCHIVE DESTINATION lib
@@ -67,4 +47,6 @@ install(TARGETS ${PROJECT_NAME}
 )
 
 # Add the tests
-add_subdirectory(tests)
+if(BUILD_TESTS)
+    add_subdirectory(tests)
+endif()

@@ -1,10 +1,10 @@
 <#
 .DESCRIPTION
-Builds Kaitai Struct C++ runtime library and unit tests on Windows using MinGW
+Builds Kaitai Struct C++ runtime library and unit tests
 
 Requires:
-- MinGW installed and available in the command prompt
-- cmake/ctest available
+- MSVC native tools installed and available in the command prompt
+- cmake/ctest available (normally installed with MSVC native tools)
 - GTest installed, path passed in `-GTestPath`
 #>
 
@@ -35,7 +35,7 @@ try {
 
     $env:VERBOSE = '1'
 
-    cmake -DCMAKE_PREFIX_PATH="$GTestPath" -DSTRING_ENCODING_TYPE="$EncodingType" -G "MinGW Makefiles" .. @ExtraArgs
+    cmake -DCMAKE_PREFIX_PATH="$GTestPath" -DSTRING_ENCODING_TYPE="$EncodingType" .. @ExtraArgs
     if ($LastExitCode -ne 0) {
         throw "'cmake' exited with code $LastExitCode"
     }
@@ -45,17 +45,8 @@ try {
         throw "'cmake --build' exited with code $LastExitCode"
     }
 
-    # MinGW Makefiles build generates the following output:
-    #
-    # - build/libkaitai_struct_cpp_stl_runtime.dll
-    # - build/libkaitai_struct_cpp_stl_runtime.dll.a
-    # - build/tests/unittest.exe
-    #
-    # unittest.exe links dynamically against GTest DLLs and `libkaitai_struct_cpp_stl_runtime.dll`, and it
-    # will need all of them in same directory as .exe to run it, so we copy it.
-
-    cp $GTestPath\debug\bin\*.dll tests
-    cp libkaitai_struct_cpp_stl_runtime.dll tests
+    cp $GTestPath\debug\bin\*.dll tests\Debug
+    cp Debug\kaitai_struct_cpp_stl_runtime.dll tests\Debug
 } finally {
     Pop-Location
 }
