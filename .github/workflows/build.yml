@@ -129,6 +129,22 @@ jobs:
             -DCMAKE_CXX_STANDARD=11 -DCMAKE_CXX_STANDARD_REQUIRED=ON -DCMAKE_CXX_EXTENSIONS=OFF
       - name: unittest
         run: .build\run-unittest.ps1
+  mingw:
+    runs-on: windows-latest
+    # NB: see https://github.com/actions/runner-images/blob/main/images/windows/Windows2022-Readme.md for what's available in this image
+    # MinGW-w64 is pre-installed on windows-latest runners
+    steps:
+      - uses: actions/checkout@v5
+      - name: restore
+        run: |
+          C:\vcpkg\bootstrap-vcpkg.bat
+          C:\vcpkg\vcpkg install gtest:x64-mingw-dynamic zlib:x64-mingw-dynamic
+      - name: build
+        run: |
+          .build\build-mingw.ps1 -GTestPath C:\vcpkg\installed\x64-mingw-dynamic -- `
+            -DCMAKE_CXX_STANDARD=11 -DCMAKE_CXX_STANDARD_REQUIRED=ON -DCMAKE_CXX_EXTENSIONS=OFF
+      - name: unittest
+        run: .build\run-unittest-mingw.ps1
   freebsd:
     runs-on: ubuntu-latest
     steps:
