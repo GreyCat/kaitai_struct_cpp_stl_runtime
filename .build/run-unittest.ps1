@@ -24,7 +24,13 @@ try {
     # passed to the script (see https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_automatic_variables?view=powershell-7.5#args).
     # We use [splatting](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_splatting?view=powershell-7.5)
     # to pass all received arguments to the test runner.
-    ./tests/Debug/unittest.exe @args
+    if (Test-Path './tests/Debug/unittest.exe') {
+        ./tests/Debug/unittest.exe @args
+    } elseif (Test-Path './tests/unittest.exe') {
+        ./tests/unittest.exe @args
+    } else {
+        throw "Unable to find the unittest executable."
+    }
 } finally {
     Pop-Location
 }
