@@ -10,7 +10,14 @@
 #define __BYTE_ORDER    BYTE_ORDER
 #define __BIG_ENDIAN    BIG_ENDIAN
 #define __LITTLE_ENDIAN LITTLE_ENDIAN
-#elif defined(_MSC_VER) // !__APPLE__
+#elif defined(__MINGW32__) || defined(__MINGW64__) // !__APPLE__
+#define __LITTLE_ENDIAN     1234
+#define __BIG_ENDIAN        4321
+#define __BYTE_ORDER        __LITTLE_ENDIAN
+#define bswap_16(x) __builtin_bswap16(x)
+#define bswap_32(x) __builtin_bswap32(x)
+#define bswap_64(x) __builtin_bswap64(x)
+#elif defined(_MSC_VER) // MSVC
 #include <stdlib.h>
 #define __LITTLE_ENDIAN     1234
 #define __BIG_ENDIAN        4321
